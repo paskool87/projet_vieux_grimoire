@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const authRoutes = require('./routes/auth');
 
 
 const app = express();
@@ -23,6 +24,8 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use('/api/auth', authRoutes);
 
 app.use((req, res) => {
   res.json({ message: "Votre requête a bien été reçue !" });
