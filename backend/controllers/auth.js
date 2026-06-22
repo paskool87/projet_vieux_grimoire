@@ -30,20 +30,20 @@ exports.login = (req, res) => {
       return bcrypt.compare(req.body.password, user.password)
         .then(valid => {
           if (!valid) {
-            return res.status(401).json({ error: 'Mot de passe incorrect' });
+            return res.status(401).json({ error: 'identifiant ou mot de passe incorrect' });
           }
 
           res.status(200).json({
             userId: user._id,
             token: jwt.sign(
               { userId: user._id },
-              'RANDOM_TOKEN_SECRET',
+              process.env.JWT_SECRET,
               { expiresIn: '24h' }
             )
           });
         });
     })
     .catch(error => {
-      res.status(500).json(error);
+      res.status(500).json({error});
     });
 };
