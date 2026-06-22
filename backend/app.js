@@ -1,15 +1,12 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const authRoutes = require('./routes/auth');
-const bookRoutes = require('./routes/book');
-const path = require('path');
-
+const authRoutes = require("./routes/auth");
+const bookRoutes = require("./routes/book");
+const path = require("path");
 
 const app = express();
 mongoose
-  .connect(
-    "mongodb+srv://pascal_db:root@cluster0.8xyqqwg.mongodb.net/?appName=Cluster0",
-  )
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch((err) => console.log(err));
 
@@ -27,9 +24,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/auth', authRoutes);
-app.use('/api/books', bookRoutes);
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use("/api/auth", authRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res) => {
   res.json({ message: "Votre requête a bien été reçue !" });
