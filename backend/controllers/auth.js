@@ -9,14 +9,14 @@ exports.signup = (req, res) => {
         email: req.body.email,
         password: hash
       });
-
       return user.save();
     })
-    .then(() => {
-      res.status(201).json({ message: 'Utilisateur créé' });
-    })
-    .catch(error => {
-      res.status(400).json(error);
+    .then(() => res.status(201).json({ message: "Utilisateur créé" }))
+    .catch((error) => {
+      if (error.code === 11000) {
+        return res.status(409).json({ message: "Cet email est déjà utilisé" });
+      }
+      res.status(500).json(error);
     });
 };
 
