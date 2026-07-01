@@ -1,4 +1,5 @@
 const express = require("express");
+const fs = require("fs");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
 const bookRoutes = require("./routes/book");
@@ -6,6 +7,11 @@ const path = require("path");
 const helmet = require('helmet');
 
 const app = express();
+// Création du dossier images s'il n'existe pas
+if (!fs.existsSync("images")) {
+  fs.mkdirSync("images");
+}
+
 mongoose
 .connect(process.env.MONGO_URI)
 .then(() => console.log("Connexion à MongoDB réussie !"))
