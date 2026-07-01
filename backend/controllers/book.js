@@ -1,5 +1,4 @@
 const Book = require("../models/Book");
-const sharp = require("sharp");
 const fs = require("fs");
 
 /* =========================
@@ -31,75 +30,43 @@ exports.getOneBook = (req, res) => {
 ========================= */
 exports.createBook = (req, res) => {
   const bookObject = JSON.parse(req.body.book);
-
   const userId = req.auth.userId;
+  const filename = req.file.optimizedFilename;
 
-  const filename = req.file.filename;
-  const inputPath = `images/${filename}`;
-  const outputPath = `images/optimized-${filename}`;
+  const book = new Book({
+    ...bookObject,
+    userId,
+    imageUrl: `${req.protocol}://${req.get("host")}/images/${filename}`,
+  });
 
-  sharp(inputPath)
-    .resize({ width: 500 })
-    .jpeg({ quality: 70 })
-    .toFile(outputPath)
-    .then(() => {
-      fs.unlinkSync(inputPath);
-
-
-      const book = new Book({
-        ...bookObject,
-        userId,
-        imageUrl: `${req.protocol}://${req.get("host")}/images/optimized-${filename}`,
-      });
-
-      return book.save();
-    })
-    .then(() => {
-      res.status(201).json({ message: "Livre créé" });
-    })
-    .catch((error) => {
-      res.status(400).json(error);
-    });
+  book.save()
+    .then(() => res.status(201).json({ message: "Livre créé" }))
+    .catch((error) => res.status(400).json(error));
 };
+
 /* =========================
-   MODIFY BOOK
+   MODIFY
 ========================= */
+
 exports.modifyBook = (req, res) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId !== req.auth.userId) {
         return res.status(403).json({ message: "Unauthorized request" });
       }
-
       const updateBook = req.file
-        ? (() => {
-            const bookObject = JSON.parse(req.body.book);
-
-            const filename = req.file.filename;
-            const inputPath = `images/${filename}`;
-            const outputPath = `images/optimized-${filename}`;
-
-            sharp(inputPath)
-              .resize({ width: 500 })
-              .jpeg({ quality: 70 })
-              .toFile(outputPath)
-              .then(() => fs.unlinkSync(inputPath));
-
-            return {
-              ...bookObject,
-              imageUrl: `${req.protocol}://${req.get("host")}/images/optimized-${filename}`,
-            };
-          })()
+        ? {
+            ...JSON.parse(req.body.book),
+            imageUrl: `${req.protocol}://${req.get("host")}/images/${req.file.optimizedFilename}`,
+          }
         : { ...req.body };
 
       return Book.updateOne(
         { _id: req.params.id },
-        { ...updateBook, _id: req.params.id },
+        { ...updateBook, _id: req.params.id }
       );
     })
-    .then(() => {
-      res.status(200).json({ message: "Livre modifié" });
-    })
+    .then(() => res.status(200).json({ message: "Livre modifié" }))
     .catch((error) => res.status(500).json(error));
 };
 
