@@ -89,14 +89,15 @@ exports.deleteBook = (req, res) => {
         return res.status(403).json({ message: "Unauthorized request" });
       }
 
+      const oldFilename = book.imageUrl.split("/images/")[1];
+      fs.unlink(`images/${oldFilename}`, (err) => {
+        if (err) console.error("Erreur suppression image:", err);
+      });
+
       return Book.deleteOne({ _id: req.params.id });
     })
-    .then(() => {
-      res.status(200).json({ message: "Livre supprimé" });
-    })
-    .catch((error) => {
-      res.status(500).json(error);
-    });
+    .then(() => res.status(200).json({ message: "Livre supprimé" }))
+    .catch((error) => res.status(500).json(error));
 };
 
 //Rating
