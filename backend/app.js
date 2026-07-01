@@ -3,12 +3,13 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/auth");
 const bookRoutes = require("./routes/book");
 const path = require("path");
+const helmet = require('helmet');
 
 const app = express();
 mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("Connexion à MongoDB réussie !"))
-  .catch((err) => console.log(err));
+.connect(process.env.MONGO_URI)
+.then(() => console.log("Connexion à MongoDB réussie !"))
+.catch((err) => console.log(err));
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -27,6 +28,7 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/images", express.static(path.join(__dirname, "images")));
+app.use(helmet());
 
 app.use((req, res) => {
   res.json({ message: "Votre requête a bien été reçue !" });
