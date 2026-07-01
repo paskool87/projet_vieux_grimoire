@@ -54,6 +54,15 @@ exports.modifyBook = (req, res) => {
       if (book.userId !== req.auth.userId) {
         return res.status(403).json({ message: "Unauthorized request" });
       }
+
+      if (req.file) {
+        // Récupère le nom de l'ancienne image depuis l'URL
+        const oldFilename = book.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${oldFilename}`, (err) => {
+          if (err) console.error("Erreur suppression ancienne image:", err);
+        });
+      }
+
       const updateBook = req.file
         ? {
             ...JSON.parse(req.body.book),
